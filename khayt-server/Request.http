@@ -1,0 +1,22 @@
+# Khayt Server HTTP requests
+
+## Create user
+
+POST http://localhost:3000/user/sign-up
+Content-Type: application/json
+
+{
+  "email": "abhay@hayt.in",
+  "username":"abhay",
+  "name": "Abhay Goswami",
+  "password": "123"
+}
+
+### Login
+POST http://localhost:3000/user/login
+Content-Type: application/json
+
+{
+  "email": "abhay@hayt.in",
+  "password": "123"
+}
