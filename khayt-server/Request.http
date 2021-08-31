@@ -6,8 +6,8 @@ POST http://localhost:3000/user/sign-up
 Content-Type: application/json
 
 {
-  "email": "abhay@hayt.in",
-  "username":"abhay",
+  "email": "abhaygoswami676@gmail.com",
+  "username":"abhay123",
   "name": "Abhay Goswami",
   "password": "123"
 }

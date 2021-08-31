@@ -21,6 +21,8 @@ export class User {
   salt: string;
   @Column({ unique: true, nullable: false })
   email: string;
+  @Column({ nullable: false, default: false })
+  isEmailVerified: boolean;
   @Column({ nullable: false })
   name: string;
   @Column()
