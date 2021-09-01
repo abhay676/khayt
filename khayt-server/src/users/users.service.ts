@@ -18,14 +18,21 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User> {
-    return this.repo.findOne({ email });
+    return this.repo.findOne({ email, isEmailVerified: true });
+  }
+
+  async verifyUserEmail(id: string) {
+    return this.repo.update(id, {
+      isEmailVerified: true,
+      updatedAt: new Date(),
+    });
   }
 
   findAll() {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
+  findOne(id: string) {
     return `This action returns a #${id} user`;
   }
 

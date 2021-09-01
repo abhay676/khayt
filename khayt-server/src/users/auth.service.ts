@@ -8,6 +8,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
+declare module 'jsonwebtoken' {
+  export interface JwtPayload {
+    email: string;
+    id: string;
+  }
+}
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UsersService) {}
@@ -39,7 +45,16 @@ export class AuthService {
     return token;
   }
   async verifyToken(userToken: string) {
-    const isTokenVerified = await JWT.verify(userToken, process.env.JWT_SECRET);
-    return isTokenVerified;
+    const isTokenVerified = <JWT.JwtPayload>(
+      await JWT.verify(userToken, process.env.JWT_SECRET)
+    );
+    const updateUserEmailStatus = await this.userService.verifyUserEmail(
+      isTokenVerified.id,
+    );
+    const user = await this.userService.findByEmail(isTokenVerified.email);
+    if (updateUserEmailStatus.affected > 0) {
+      return [true, isTokenVerified.email, user.name];
+    }
+    return [false, null, null];
   }
 }

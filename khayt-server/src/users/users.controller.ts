@@ -32,14 +32,13 @@ export class UsersController {
       id: user.id,
     });
     const content = {
-      verifyURL: token,
+      mailContent: token,
       type: 'verify',
       email: user.email,
     };
-    const queueMessage = JSON.stringify(content);
     const queuePattern = 'queue';
     // push to Queue
-    this.rabbitMQService.send(queuePattern, queueMessage);
+    this.rabbitMQService.send(queuePattern, content);
     return user;
   }
 
@@ -48,10 +47,24 @@ export class UsersController {
     return this.authService.singIn(data.email, data.password);
   }
 
-  @Get()
-  verifyUser(@Query() query) {
+  @Get('/verify')
+  async verifyUser(@Query() query) {
+    const queuePattern = 'queue';
     const token = query.token;
-    return this.authService.verifyToken(token);
+    const [isUserVerified, userEmail, userName] =
+      await this.authService.verifyToken(token);
+
+    if (isUserVerified) {
+      const content = {
+        type: 'welcome',
+        email: userEmail,
+        mailContent: userName,
+      };
+      this.rabbitMQService.send(queuePattern, content);
+    }
+    return {
+      success: true,
+    };
   }
 
   @Get()
@@ -61,7 +74,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Patch(':id')
