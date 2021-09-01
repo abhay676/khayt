@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { RabbitMQService } from './rabbitmq.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     ClientsModule.register([
       {
         name: 'rabbitmq',
@@ -12,6 +16,9 @@ import { RabbitMQService } from './rabbitmq.service';
         options: {
           urls: [process.env.AMQP_SERVER],
           queue: process.env.QUEUE,
+          queueOptions: {
+            durable: false,
+          },
         },
       },
     ]),

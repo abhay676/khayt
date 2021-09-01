@@ -5,8 +5,14 @@ import { ClientProxy } from '@nestjs/microservices';
 export class RabbitMQService {
   constructor(@Inject('rabbitmq') private readonly client: ClientProxy) {}
 
-  public send(pattern: string, data: any) {
-    console.log('Shipping to the rocket');
-    return this.client.send(pattern, data);
+  public async send(pattern: string, data: any) {
+    try {
+      console.log('----------Shipping to the rocket-----------');
+      return this.client.emit(pattern, JSON.stringify(data)).subscribe(() => {
+        console.log('------------Done with the queue--------');
+      });
+    } catch (error) {
+      console.log('err: ', error);
+    }
   }
 }
