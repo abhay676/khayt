@@ -19,11 +19,12 @@ export const consumeMessage = () => {
           );
           return channel.consume(queue, (msg) => {
             if (msg !== null) {
-              const { type, email, verifyURL } = JSON.parse(
-                msg.content.toString()
-              );
+              const queueMessage = msg.content.toString();
+              const { pattern, data } = JSON.parse(queueMessage);
+              console.log(data);
+              const { type, email, mailContent } = JSON.parse(data);
               console.log(' [x] Received %s');
-              sendMail(type, email, verifyURL).then(() => {
+              sendMail(type, email, mailContent).then(() => {
                 channel.ack(msg);
               });
             }
