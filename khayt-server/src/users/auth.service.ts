@@ -36,6 +36,10 @@ export class AuthService {
     // check password
     const isPwdMatch = await user.validatePassword(password);
     if (!isPwdMatch) throw new BadRequestException('password not match');
+
+    delete user.email;
+    delete user.salt;
+
     return user;
   }
   async createUserVerifyToken(data: { email: string; id: string }) {
