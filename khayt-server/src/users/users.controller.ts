@@ -7,7 +7,8 @@ import {
   Param,
   Delete,
   Query,
-  Req,
+  Session,
+  BadRequestException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -43,8 +44,17 @@ export class UsersController {
   }
 
   @Post('/login')
-  login(@Body() data: { email: string; password: string }) {
-    return this.authService.singIn(data.email, data.password);
+  async login(
+    @Body() data: { email: string; password: string },
+    @Session() session: any,
+  ) {
+    const user = await this.authService.singIn(data.email, data.password);
+    if (user.isEmailVerified) {
+      session.userId = user.id;
+      session.email = user.email;
+      return user;
+    }
+    return new BadRequestException('user is not verified yet');
   }
 
   @Get('/verify')
