@@ -5,10 +5,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 import * as bcrypt from 'bcryptjs';
 
+import { Url } from 'src/url/entities/url.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -25,6 +27,8 @@ export class User {
   isEmailVerified: boolean;
   @Column({ nullable: false })
   name: string;
+  @OneToMany(() => Url, (url) => url.shortURL, { onDelete: 'CASCADE' })
+  links: Url[];
   @Column()
   @CreateDateColumn()
   createdAt: Date;

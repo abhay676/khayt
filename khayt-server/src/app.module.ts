@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RabbitMQModule } from './rabbitmq.module';
 import { UsersModule } from './users/users.module';
+import { UrlModule } from './url/url.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
       synchronize: true,
     }),
     UsersModule,
+    UrlModule,
   ],
   controllers: [AppController],
   providers: [AppService],
