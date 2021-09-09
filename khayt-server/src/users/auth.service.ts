@@ -37,12 +37,12 @@ export class AuthService {
     const isPwdMatch = await user.validatePassword(password);
     if (!isPwdMatch) throw new BadRequestException('password not match');
 
-    delete user.email;
+    delete user.password;
     delete user.salt;
 
     return user;
   }
-  async createUserVerifyToken(data: { email: string; id: string }) {
+  async createToken(data: { email: string; id: string }) {
     const token = await JWT.sign(data, process.env.JWT_SECRET, {
       expiresIn: '300000', // 5 minutes
     });
@@ -52,6 +52,9 @@ export class AuthService {
     const isTokenVerified = <JWT.JwtPayload>(
       await JWT.verify(userToken, process.env.JWT_SECRET)
     );
+    return isTokenVerified;
+  }
+  async setupUserAccess(isTokenVerified) {
     const updateUserEmailStatus = await this.userService.verifyUserEmail(
       isTokenVerified.id,
     );

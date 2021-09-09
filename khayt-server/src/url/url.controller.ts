@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   Session,
+  BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
-import { UpdateUrlDto } from './dto/update-url.dto';
 import { Url } from './entities/url.entity';
+import { AuthGuard, IRequest } from 'src/shared/guards/auth.guard';
 
 @Controller('url')
 export class UrlController {
@@ -19,7 +21,7 @@ export class UrlController {
 
   @Post('/create')
   async create(@Body() createUrlDto: CreateUrlDto, @Session() session: any) {
-    createUrlDto.user = session.userId;
+    createUrlDto.userId = session.userId;
     const URL: Url & { displayURL?: string } = await this.urlService.create(
       createUrlDto,
     );
@@ -34,12 +36,15 @@ export class UrlController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.urlService.findOne(+id);
+    return this.urlService.findOne(id);
   }
 
+  @UseGuards(AuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUrlDto: UpdateUrlDto) {
-    return this.urlService.update(+id, updateUrlDto);
+  async update(@Param('id') id: string) {
+    const updatedResult = await this.urlService.update(id);
+    if (!updatedResult) return new BadRequestException('no url found');
+    return updatedResult;
   }
 
   @Delete(':id')

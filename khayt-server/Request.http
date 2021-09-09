@@ -29,3 +29,9 @@ Content-Type: application/json
   "longURL": "https://instagram.com",
   "isPasswordProtected": false
 }
+
+### Add URL to Fav.
+PATCH   http://localhost:3000/url/1a2a5fd5-0741-40f5-86c3-11cc172f749f
+Content-Type: application/json
+
+{}

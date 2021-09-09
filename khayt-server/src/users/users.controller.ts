@@ -9,6 +9,7 @@ import {
   Query,
   Session,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -28,7 +29,7 @@ export class UsersController {
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.authService.signUp(createUserDto);
     // generate Verification token
-    const token = await this.authService.createUserVerifyToken({
+    const token = await this.authService.createToken({
       email: user.email,
       id: user.id,
     });
@@ -46,12 +47,15 @@ export class UsersController {
   @Post('/login')
   async login(
     @Body() data: { email: string; password: string },
-    @Session() session: any,
+    @Session() session: { token: string },
   ) {
     const user = await this.authService.singIn(data.email, data.password);
+
     if (user.isEmailVerified) {
-      session.userId = user.id;
-      session.email = user.email;
+      session.token = await this.authService.createToken({
+        email: user.email,
+        id: user.id,
+      });
       return user;
     }
     return new BadRequestException('user is not verified yet');
@@ -61,20 +65,23 @@ export class UsersController {
   async verifyUser(@Query() query) {
     const queuePattern = 'queue';
     const token = query.token;
-    const [isUserVerified, userEmail, userName] =
-      await this.authService.verifyToken(token);
-
-    if (isUserVerified) {
-      const content = {
-        type: 'welcome',
-        email: userEmail,
-        mailContent: userName,
-      };
-      this.rabbitMQService.send(queuePattern, content);
+    const isValidToken = await this.authService.verifyToken(token);
+    if (isValidToken) {
+      const [isUserVerified, userEmail, userName] =
+        await this.authService.setupUserAccess(isValidToken);
+      if (isUserVerified) {
+        const content = {
+          type: 'welcome',
+          email: userEmail,
+          mailContent: userName,
+        };
+        this.rabbitMQService.send(queuePattern, content);
+        return {
+          success: true,
+        };
+      }
     }
-    return {
-      success: true,
-    };
+    return new UnauthorizedException('token is malfunctioned');
   }
 
   @Get()

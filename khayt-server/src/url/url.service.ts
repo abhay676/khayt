@@ -3,7 +3,6 @@ import { nanoid } from 'nanoid';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUrlDto } from './dto/create-url.dto';
-import { UpdateUrlDto } from './dto/update-url.dto';
 import { Url } from './entities/url.entity';
 
 @Injectable()
@@ -25,12 +24,19 @@ export class UrlService {
     return `This action returns all url`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} url`;
+  findOne(id: string) {
+    return this.urlRepo.find({ id });
   }
 
-  update(id: number, updateUrlDto: UpdateUrlDto) {
-    return `This action updates a #${id} url`;
+  async update(id: string) {
+    const updateURL = await this.urlRepo.update(id, {
+      isFavourite: true,
+      updatedAt: new Date(),
+    });
+    if (updateURL.affected) {
+      return this.findOne(id);
+    }
+    return null;
   }
 
   remove(id: number) {

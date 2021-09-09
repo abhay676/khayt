@@ -8,5 +8,5 @@ export class CreateUrlDto {
   isPasswordProtected: boolean;
   password: string;
   expireAt: Date;
-  user: User;
+  userId: User;
 }
